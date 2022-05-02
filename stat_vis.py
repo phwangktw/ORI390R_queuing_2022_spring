@@ -45,6 +45,72 @@ def plot_util(node_object_list):
     plt.show()
 
 
-def gantt_generate():
+def gantt_generate(recs_list, nodeNumber):
     
-    dumy = 1
+    raw = recs_list[0]
+    
+    arrival_date_list = [r.arrival_date for r in raw]
+    waiting_time_list = [r.waiting_time for r in raw]
+    service_time_list = [r.service_time for r in raw]
+    service_end_date_list = [r.service_end_date for r in raw]
+    exit_date_list = [r.exit_date for r in raw]
+    node_list = [r.node for r in raw]
+    server_id_list = [r.server_id for r in raw]
+    
+    df = pd.DataFrame(
+        {'arrival_date': arrival_date_list,
+         'waiting_time': waiting_time_list,
+         'service_time': service_time_list,
+         'service_end_date': service_end_date_list,
+         'exit_date': exit_date_list,
+         'node': node_list,
+         'server_id': server_id_list,
+        })
+    
+    df['service_start'] = df['arrival_date'] + df['waiting_time'] 
+    df_station = df[df['node']==nodeNumber].sort_values(by = ['server_id', 'service_start']).reset_index(drop=True)
+    del df
+    dum = 1
+    
+    fig, ax = plt.subplots()
+    ax.barh(df_station.server_id, df_station.service_time, left=df_station.service_start)
+    plt.gca().invert_yaxis()
+    ax.set_yticks(np.arange(1, 12, 1, dtype=int))
+    ax.set_xlabel('time (hr)')
+    ax.set_ylabel('server_id')
+    
+    plt.show()
+    
+
+def queue_plot(recs_list):
+    raw = recs_list[0]
+    
+    arrival_date_list = [r.arrival_date for r in raw]
+    queue_size_at_arrival_list = [r.queue_size_at_arrival for r in raw]
+    node_list = [r.node for r in raw]
+    
+    df = pd.DataFrame(
+        {'arrival_date': arrival_date_list,
+         'node': node_list,
+         'queue_size_at_arrival': queue_size_at_arrival_list,
+        })
+    
+    fig, axes = plt.subplots(1, 3, figsize=(14,5))
+    # figurecount = 1
+    plot_time = 0
+    for fig_i in range(3):
+        maxtime = df['arrival_date'].max()
+        plot_interval = maxtime/3
+        plot_time = plot_interval*(fig_i+1)
+        
+        # extract the time close to current plot-time for each node
+        df['time_gap'] = abs(plot_time - df['arrival_date'])
+        df_plot_temp = df.loc[df.groupby('node').time_gap.idxmin()]
+        
+        sns.barplot(ax=axes[fig_i], x='node', y='queue_size_at_arrival', data=df_plot_temp)
+        #subplot >2 rows: https://dev.to/thalesbruno/subplotting-with-matplotlib-and-seaborn-5ei8
+        axes[fig_i].set_title('time='+str(round(plot_time,0)))
+        
+        
+        # figurecount += 1
+    plt.show()

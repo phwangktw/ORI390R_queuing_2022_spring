@@ -53,8 +53,16 @@ for trial in range(10):
     recs_list.append(Q.get_all_records())
     node_result_list.append(Q.transitive_nodes)
     
+# Step3. Analytical plot from the simulation results
+## 3-1 Utilization
 vis.plot_util(Q.transitive_nodes)
 
+## 3-2 Single station Gantt plot
+nodeStation = 3
+vis.gantt_generate(recs_list, nodeStation)
+
+## 3-3 Queue length
+vis.queue_plot(recs_list)
 
 # Results summary
 ## all records change to df
