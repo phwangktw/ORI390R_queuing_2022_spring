@@ -114,3 +114,91 @@ def queue_plot(recs_list):
         
         # figurecount += 1
     plt.show()
+    
+    
+def overall_queue_plot(recs_list, simu_num, maxtime):
+    
+    time_intervals = 300
+    temp_q_length = np.zeros(time_intervals)    
+    interval_list = np.linspace(0, maxtime, time_intervals).tolist()
+    for loop in range(simu_num):
+    # for loop all simulation results
+        raw = recs_list[loop]
+        
+        arrival_date_list = [r.arrival_date for r in raw]
+        queue_size_at_arrival_list = [r.queue_size_at_arrival for r in raw]
+        node_list = [r.node for r in raw]
+        
+        
+        df = pd.DataFrame(
+            {'arrival_date': arrival_date_list,
+             'node': node_list,
+             'queue_size_at_arrival': queue_size_at_arrival_list,
+            })        
+        
+        # maxtime = df['arrival_date'].max()       
+        
+        for i in range(time_intervals):
+            cur_time = interval_list[i]
+            df['time_gap'] = abs(i - df['arrival_date'])
+            df_plot_temp = df.loc[df.groupby('node').time_gap.idxmin()]
+            cur_queue = df_plot_temp.queue_size_at_arrival.sum()        
+            temp_q_length[i] += cur_queue
+            
+    avg_q_length = temp_q_length/simu_num        
+    df_plot = pd.DataFrame(interval_list, columns = ['time'])
+        
+    df_plot = pd.concat([df_plot, pd.DataFrame(avg_q_length, columns = ['queue_num'])], axis=1)
+    
+    fig, ax = plt.subplots()
+    sns.lineplot(x="time", y="queue_num", markers=True, data=df_plot)
+    # ax.set_yticks(np.arange(1, 12, 1, dtype=int))
+    ax.set_xlabel('time (hr)')
+    ax.set_ylabel('queue_num in the system')
+    
+    plt.show()
+    
+def overall_queue_plot2(expt_result_all, simu_num, maxtime):
+    expt = 3
+    fig, ax = plt.subplots()
+    for expt_i in range(expt):
+        recs_list = expt_result_all[expt_i]
+        time_intervals = 300
+        temp_q_length = np.zeros(time_intervals)    
+        interval_list = np.linspace(0, maxtime, time_intervals).tolist()
+        for loop in range(simu_num):
+        # for loop all simulation results
+            raw = recs_list[loop]
+            
+            arrival_date_list = [r.arrival_date for r in raw]
+            queue_size_at_arrival_list = [r.queue_size_at_arrival for r in raw]
+            node_list = [r.node for r in raw]
+            
+            
+            df = pd.DataFrame(
+                {'arrival_date': arrival_date_list,
+                 'node': node_list,
+                 'queue_size_at_arrival': queue_size_at_arrival_list,
+                })        
+            
+            # maxtime = df['arrival_date'].max()       
+            
+            for i in range(time_intervals):
+                cur_time = interval_list[i]
+                df['time_gap'] = abs(i - df['arrival_date'])
+                df_plot_temp = df.loc[df.groupby('node').time_gap.idxmin()]
+                cur_queue = df_plot_temp.queue_size_at_arrival.sum()        
+                temp_q_length[i] += cur_queue
+                
+        avg_q_length = temp_q_length/simu_num    
+        
+        df_plot = pd.DataFrame(interval_list, columns = ['time'])            
+        df_plot = pd.concat([df_plot, pd.DataFrame(avg_q_length, columns = ['queue_num'])], axis=1)
+        
+        
+        sns.lineplot(x="time", y="queue_num", markers=True, data=df_plot, legend='brief', label="Expt_"+str(expt_i+1))
+        # ax.set_yticks(np.arange(1, 12, 1, dtype=int))
+    ax.set_xlabel('time (hr)')
+    ax.set_ylabel('queue_num in the system')
+    ax.legend()
+    plt.show()

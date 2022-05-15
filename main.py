@@ -46,14 +46,19 @@ N = ciw.create_network(arrival_distributions=arrival_distributions_input,
 # Step2. Simulation (10 times)
 node_result_list = []
 recs_list = []
-for trial in range(10):
+simu_num = 10
+max_time = 360
+for trial in range(simu_num):
     ciw.seed(trial)
     Q = ciw.Simulation(N)
-    Q.simulate_until_max_time(72)
+    Q.simulate_until_max_time(max_time)
     recs_list.append(Q.get_all_records())
     node_result_list.append(Q.transitive_nodes)
     
 # Step3. Analytical plot from the simulation results
+## 3-4 Queue length
+vis.overall_queue_plot(recs_list, simu_num, max_time)
+
 ## 3-1 Utilization
 vis.plot_util(Q.transitive_nodes)
 
