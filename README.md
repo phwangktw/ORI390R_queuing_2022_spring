@@ -1,8 +1,3 @@
-# ORI390R_queuing_2022_spring
-final project: manufacturing queuing network by CIW
+# Project of ORI390 Queuing Theory: Performance Optimization for an Simulated OJN Semiconductor Production System
 
-## Network queuing modeling
-![](Figures/modeling.png)
-
-## Alogorithm structure
-![](Figures/algorithm.png)
+Author: PO-HAN WANG, YEN-YU CHEN
